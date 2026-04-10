@@ -215,6 +215,12 @@ function setMessage(text, kind) {
   message.className = 'msg' + (kind ? ' ' + kind : '');
 }
 
+function makeVisitToken() {
+  var stamp = Date.now().toString(36);
+  var rand = Math.random().toString(36).slice(2, 10);
+  return stamp + rand;
+}
+
 form.addEventListener('submit', function (event) {
   event.preventDefault();
   var code = (input.value || '').trim();
@@ -233,7 +239,7 @@ form.addEventListener('submit', function (event) {
 
   sessionStorage.setItem('lcr_gate_passed', 'true');
   setMessage('Access granted. Redirecting…', 'ok');
-  window.location.href = TARGET_PATH;
+  window.location.href = TARGET_PATH + '#access-' + makeVisitToken();
 });
 </script>
 </body>
