@@ -532,6 +532,10 @@ body {
 if (sessionStorage.getItem('lcr_gate_passed') !== 'true') {
   window.location.replace('../');
 }
+
+window.addEventListener('pagehide', function () {
+  sessionStorage.removeItem('lcr_gate_passed');
+});
 </script>
 
 <!-- ═══ HEADER ═══ -->
