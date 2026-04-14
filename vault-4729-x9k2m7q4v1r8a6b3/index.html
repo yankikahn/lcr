@@ -86,21 +86,53 @@ body {
 .tab-nav {
   background: var(--white);
   border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: stretch;
+}
+.tab-nav-inner {
+  flex: 1;
   overflow-x: auto;
   white-space: nowrap;
-}
-.tab-nav::-webkit-scrollbar { display: none; }
-.tab-nav-inner {
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 0 32px;
   display: flex;
+  justify-content: center;
+  padding: 0 4px;
+  scroll-behavior: smooth;
 }
+.tab-nav-inner::-webkit-scrollbar { display: none; }
+@media (max-width: 900px) {
+  .tab-nav-inner { justify-content: flex-start; }
+}
+/* Arrow scroll buttons */
+.tab-scroll-btn {
+  flex-shrink: 0;
+  width: 36px;
+  background: var(--white);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-soft);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .15s, background .15s;
+  padding: 0;
+  margin: 0;
+}
+.tab-scroll-btn:hover { color: var(--navy); background: var(--navy-soft); }
+.tab-scroll-left  { border-right: 1px solid var(--border); }
+.tab-scroll-right { border-left:  1px solid var(--border); }
+.tab-scroll-btn.hidden { visibility: hidden; pointer-events: none; }
 .tab-btn {
-  padding: 0 20px;
+  padding: 0 16px;
   height: 52px;
   font-family: 'Rajdhani', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -113,7 +145,9 @@ body {
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 5px;
+  flex-shrink: 0;
 }
 .tab-btn:hover { color: var(--navy); }
 .tab-btn.active { color: var(--navy); border-bottom-color: var(--red); }
@@ -553,8 +587,9 @@ window.addEventListener('pagehide', function () {
 </header>
 
 <!-- ═══ TAB NAV ═══ -->
-<nav class="tab-nav">
-  <div class="tab-nav-inner">
+<nav class="tab-nav" id="tab-nav">
+  <button class="tab-scroll-btn tab-scroll-left" id="tab-scroll-left" aria-label="Scroll tabs left">&#8249;</button>
+  <div class="tab-nav-inner" id="tab-nav-inner">
     <button class="tab-btn active" data-p="overview">📊 Overview</button>
     <button class="tab-btn" data-p="ideology">🏛 Ideology</button>
     <button class="tab-btn" data-p="approval">⭐ Approval</button>
@@ -568,6 +603,7 @@ window.addEventListener('pagehide', function () {
     <button class="tab-btn" data-p="history">🕐 History</button>
     <button class="tab-btn" data-p="responses">📄 Responses</button>
   </div>
+  <button class="tab-scroll-btn tab-scroll-right" id="tab-scroll-right" aria-label="Scroll tabs right">&#8250;</button>
 </nav>
 
 <!-- ═══ FILTER BAR ═══ -->
@@ -1146,8 +1182,30 @@ document.querySelectorAll('.tab-btn').forEach(function(btn){
     var pnl=document.getElementById('p-'+this.getAttribute('data-p'));
     if(pnl)pnl.classList.add('active');
     window.scrollTo({top:0,behavior:'smooth'});
+    // Scroll the active tab into view on narrow screens
+    this.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
   });
 });
+
+// Tab nav scroll arrows
+(function(){
+  var inner = document.getElementById('tab-nav-inner');
+  var btnL  = document.getElementById('tab-scroll-left');
+  var btnR  = document.getElementById('tab-scroll-right');
+  if(!inner || !btnL || !btnR) return;
+
+  function updateArrows(){
+    var overflows = inner.scrollWidth > inner.clientWidth + 2;
+    btnL.classList.toggle('hidden', !overflows || inner.scrollLeft < 4);
+    btnR.classList.toggle('hidden', !overflows || inner.scrollLeft >= inner.scrollWidth - inner.clientWidth - 4);
+  }
+
+  btnL.addEventListener('click', function(){ inner.scrollBy({left: -180, behavior:'smooth'}); });
+  btnR.addEventListener('click', function(){ inner.scrollBy({left:  180, behavior:'smooth'}); });
+  inner.addEventListener('scroll', updateArrows);
+  window.addEventListener('resize', updateArrows);
+  updateArrows();
+})();
 
 // ════════════════════════════════════════
 //  FILTERS
